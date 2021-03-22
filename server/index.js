@@ -2,50 +2,54 @@
 const express = require('express');
 const dotenv = require("dotenv").config();
 const cors = require('cors');
+const passport = require('passport');
+const cookieSession = require('cookie-session')
+require('./passport-setup');
 
 const app = express();
 app.use(cors())
 
-// (async () => {
-//     const Produto = require('./models/Produto');
-//     const database = require('./db');
- 
-//     try {
-//         // - SYNC
-//         // const resultado = await database.sync();
+// For an actual app you should configure this with an experation time, better keys, proxy and secure
+app.use(cookieSession({
+    name: 'tuto-session',
+    keys: ['key1', 'key2']
+  }))
 
-//         // - CREATE
-//         // const resultadoCreate = await Produto.create({
-//         //     nome: 'mouse',
-//         //     preco: 10,
-//         //     descricao: 'Um mouse USB bonitão'
-//         // })
+// Auth middleware that checks if the user is logged in
+const isLoggedIn = (req, res, next) => {
+    if (req.user) {
+        next();
+    } else {
+        res.sendStatus(401);
+    }
+}
 
-//         // - READ ALL
-//         // const produtos = await Produto.findAll();
-//         // console.log(produtos); 
-        
-//         // - READ ONE
-//         // const produto = await Produto.findByPk(1);
-//         // console.log(produto)   
+// Initializes passport and passport sessions
+app.use(passport.initialize());
+app.use(passport.session());
 
-//         // - UPDATE
-//         // const produto = await Produto.findByPk(1);
-//         // console.log(produto)           
-//         // produto.nome = "Mouse Top";
-//         // const resultadoSave = await produto.save();
-//         // console.log(resultadoSave);    
+// Example protected and unprotected routes
+app.get('/', (req, res) => res.send('Example Home page!'))
+app.get('/failed', (req, res) => res.send('You Failed to log in!'))
 
-//         //--DELETE
-//         // assim
-//         // Produto.destroy({ where: { id: 1 }});
-//         // ou assim
-//         // const produto = await Produto.findByPk(1);
-//         // produto.destroy();                          
-//     } catch (error) {
-//         console.log(error);
-//     }
-// })();
+// In this route you can see that if the user is logged in u can acess his info in: req.user
+app.get('/good', isLoggedIn, (req, res) => res.send(`Welcome mr ${req.user.displayName}!`))
+
+// Auth Routes
+app.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+app.get('/google/callback', passport.authenticate('google', { failureRedirect: '/failed' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/good');
+  }
+);
+
+app.get('/logout', (req, res) => {
+    req.session = null;
+    req.logout();
+    res.redirect('/');
+})
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
