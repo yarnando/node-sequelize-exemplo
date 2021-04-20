@@ -81,6 +81,75 @@ class PlanosController {
             return res.status(500).send({ error: error });
         }
     }        
+    async listSubscriptions(req, res) {
+        try {
+            const data = req.body 
+            console.log(data);
+            let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+            let subscriptions = await clientPagarme.subscriptions.all()  
+            console.log(subscriptions);
+            const response = subscriptions            
+            return res.status(200).send(response);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({ error: error });
+        }
+    }        
+    async updateSubscription(req, res) {
+        try {
+            const {
+                subscription_id,
+                payment_method,
+                card_id,
+            } = req.body 
+            // console.log(data);
+            let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+            let updatedSub = await clientPagarme.subscriptions.update({
+                id: subscription_id,
+                payment_method,
+                card_id
+            })  
+            const response = updatedSub            
+            return res.status(201).send(response);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({ error: error });
+        }
+    }        
+    async listSubscriptionTransactions(req, res) {
+        try {
+            const {
+                subscription_id,
+            } = req.body 
+            // console.log(data);
+            let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+            let transactionList = await clientPagarme.subscriptions.findTransactions({
+                id: subscription_id,
+            })  
+            const response = transactionList            
+            return res.status(200).send(response);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({ error: error });
+        }
+    }  
+    async cancelSubscription(req, res) {
+        try {
+            const {
+                subscription_id,
+            } = req.body 
+            // console.log(data);
+            let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+            let canceledSub = await clientPagarme.subscriptions.cancel({
+                id: subscription_id,
+            })  
+            const response = canceledSub            
+            return res.status(200).send(response);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({ error: error });
+        }
+    }          
 }
 
 module.exports = new PlanosController();
