@@ -30,7 +30,7 @@ class usuariosController {
             })
             const response = {
                 status: true,
-                message: "Produto criado com sucesso!",
+                message: "Usuario criado com sucesso!",
                 data: {
                     createdUserId: resultadoCreate.id_usuario
                 }
