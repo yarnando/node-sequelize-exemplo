@@ -56,7 +56,11 @@ app.use(express.urlencoded({ extended: true }));
 
 const usuarioRoutes = require('./routes/usuarios')
 app.use('/usuarios', usuarioRoutes);
+
 const planosRoutes = require('./routes/planos')
 app.use('/planos', planosRoutes);
+
+const produtosRoutes = require('./routes/produtos')
+app.use('/produtos', produtosRoutes);
 
 app.listen(process.env.PORT || 9001);
