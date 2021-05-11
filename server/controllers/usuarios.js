@@ -261,10 +261,18 @@ class usuariosController {
     async delete(req, res) {
         try {
             const usuario = await Usuario.findByPk(req.params.id);
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Usuario não encontrado",
+                    data: null
+                }
+                return res.status(400).send(response);                   
+            }
             const resultadoDelete = await usuario.destroy();
             const response = {
                 status: true,
-                message: "usuario deletado com sucesso",
+                message: "Usuario deletado com sucesso",
                 data: resultadoDelete
             }
             return res.status(200).send(response);               
