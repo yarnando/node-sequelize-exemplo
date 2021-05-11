@@ -18,13 +18,19 @@ class PlanosController {
             })  
             console.log(createdPlan);
             const response = {
+                status: true,
                 message: "Plano criado com sucesso!",
-                plano: createdPlan
+                data: createdPlan
             }               
             return res.status(201).send(response);
         } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao criar plano",
+                data: error
+            }              
             console.log(error);
-            return res.status(500).send({ error: error });
+            return res.status(500).send(response);
         }
     }    
     async list(req, res) {
@@ -36,12 +42,19 @@ class PlanosController {
             })  
             console.log(list);
             const response = {
-                list
+                status: true,
+                message: "Listagem de planos obtida com sucesso!",
+                data: list
             }               
             return res.status(200).send(response);
         } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao listar planos",
+                data: error
+            }              
             console.log(error);
-            return res.status(500).send({ error: error });
+            return res.status(500).send(response);            
         }
     }  
     async createCard(req, res) {
@@ -51,15 +64,21 @@ class PlanosController {
             let createdCard = await clientPagarme.cards.create({
                 ...payload              
             })  
-            console.log(createdCard);
+            console.log(createdCard);   
             const response = {
+                status: true,
                 message: "Cartao criado com sucesso!",
-                cartao: createdCard
-            }               
+                data: createdCard
+            }                       
             return res.status(201).send(response);
         } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao criar cartão",
+                data: error
+            }              
             console.log(error);
-            return res.status(500).send({ error: error });
+            return res.status(500).send(response); 
         }
     }      
     async subscribe(req, res) {
@@ -70,15 +89,21 @@ class PlanosController {
             let createdSubscription = await clientPagarme.subscriptions.create({
                 ...data               
             })  
-            console.log(createdSubscription);
+            console.log(createdSubscription);   
             const response = {
+                status: true,
                 message: "Plano assinado com sucesso!",
-                assinatura: createdSubscription
-            }               
+                data: createdSubscription
+            }                    
             return res.status(201).send(response);
         } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao assinar plano",
+                data: error
+            }              
             console.log(error);
-            return res.status(500).send({ error: error });
+            return res.status(500).send(response); 
         }
     }        
     async listSubscriptions(req, res) {
@@ -88,11 +113,20 @@ class PlanosController {
             let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
             let subscriptions = await clientPagarme.subscriptions.all()  
             console.log(subscriptions);
-            const response = subscriptions            
+            const response = {
+                status: true,
+                message: "Lista de assinaturas obtida com sucesso!",
+                data: subscriptions
+            }                        
             return res.status(200).send(response);
         } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao listar assinaturas",
+                data: error
+            }              
             console.log(error);
-            return res.status(500).send({ error: error });
+            return res.status(500).send(response); 
         }
     }        
     async updateSubscription(req, res) {
@@ -109,11 +143,20 @@ class PlanosController {
                 payment_method,
                 card_id
             })  
-            const response = updatedSub            
-            return res.status(201).send(response);
+            const response = {
+                status: true,
+                message: "Assinatura atualizada com sucesso!",
+                data: updatedSub
+            }                          
+            return res.status(200).send(response);
         } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao atualizar assinatura",
+                data: error
+            }              
             console.log(error);
-            return res.status(500).send({ error: error });
+            return res.status(500).send(response); 
         }
     }        
     async listSubscriptionTransactions(req, res) {
@@ -125,12 +168,21 @@ class PlanosController {
             let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
             let transactionList = await clientPagarme.subscriptions.findTransactions({
                 id: subscription_id,
-            })  
-            const response = transactionList            
+            })      
+            const response = {
+                status: true,
+                message: "Lista de transações da assinatura obtida com sucesso!",
+                data: transactionList
+            }                   
             return res.status(200).send(response);
         } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao listar transações da assinatura",
+                data: error
+            }              
             console.log(error);
-            return res.status(500).send({ error: error });
+            return res.status(500).send(response); 
         }
     }  
     async cancelSubscription(req, res) {
@@ -143,11 +195,20 @@ class PlanosController {
             let canceledSub = await clientPagarme.subscriptions.cancel({
                 id: subscription_id,
             })  
-            const response = canceledSub            
+            const response = {
+                status: true,
+                message: "Assinatura cancelada com sucesso!",
+                data: canceledSub
+            }                       
             return res.status(200).send(response);
         } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao cancelar assinatura",
+                data: error
+            }              
             console.log(error);
-            return res.status(500).send({ error: error });
+            return res.status(500).send(response); 
         }
     }          
 }

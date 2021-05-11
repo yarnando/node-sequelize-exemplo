@@ -17,23 +17,61 @@ class produtosController {
                 descricao
             })       
             const response = {
+                status: true,
                 message: "Produto criado com sucesso!",
-                createdProdutoId: resultadoCreate.id
+                data: {
+                    createdProdutoId: resultadoCreate.id
+                }                
             }               
             return res.status(201).send(response);
         } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao criar produto",
+                data: error
+            }              
             console.log(error);
-            return res.status(500).send({ error: error });
+            return res.status(500).send(response); 
         }
     }                   
     async readOne(req, res) {
-        const produto = await Produto.findByPk(req.params.id);
-        return res.json(produto);
+        try {
+            const produto = await Produto.findByPk(req.params.id);
+            const response = {
+                status: true,
+                message: "Produto obtido com sucesso!",
+                data: produto              
+            }              
+            return res.json(response);            
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao buscar produto",
+                data: error
+            }              
+            console.log(error);
+            return res.status(500).send(response); 
+        }
     }           
     async readAll(req, res) {
-        const resultado = await database.sync();
-        const produtos = await Produto.findAll();     
-        return res.json(produtos);
+        try {
+            const resultado = await database.sync();
+            const produtos = await Produto.findAll();   
+            const response = {
+                status: true,
+                message: "Lista de produtos obtida com sucesso!",
+                data: produtos              
+            }              
+            return res.json(response);                          
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao listar todos os produtos",
+                data: error
+            }              
+            console.log(error);
+            return res.status(500).send(response);             
+        }
     }           
     async update(req, res) {
         try {
@@ -48,21 +86,41 @@ class produtosController {
             produto.preco = preco;
             produto.descricao = descricao;       
             const resultadoSave = await produto.save();       
-            return res.json('Produto modificado com sucesso')    
+            const response = {
+                status: true,
+                message: "Produto alterado com sucesso!",
+                data: resultadoSave              
+            }              
+            return res.json(response);  
         } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao alterar produto",
+                data: error
+            }              
             console.log(error);
-            return res.status(500).send({ error: error });
+            return res.status(500).send(response);    
         }
     }   
     async delete(req, res) {
         try {
             let id = req.params.id 
             const produto = await Produto.findByPk(id);     
-            const resultadoDelete = await produto.destroy();      
-            return res.json('Produto deletado com sucesso')    
+            const resultadoDelete = await produto.destroy();  
+            const response = {
+                status: true,
+                message: "Produto deletado com sucesso!",
+                data: resultadoDelete              
+            }              
+            return res.json(response);                     
         } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao deletar produto",
+                data: error
+            }              
             console.log(error);
-            return res.status(500).send({ error: error });
+            return res.status(500).send(response); 
         }        
     }   
 }

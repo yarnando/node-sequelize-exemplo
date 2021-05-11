@@ -5,141 +5,279 @@ const crypto = require('crypto')
 const mailer = require('../modules/mailer')
 const jwt = require('jsonwebtoken');
 
-class usuariosController {    
+class usuariosController {
     async create(req, res) {
         try {
             const { email } = req.body
-            const { senha } = req.body          
+            const { senha } = req.body
             let result = await Usuario.findAll({
                 where: {
                     email
                 }
             })
             if (result.length > 0) {
-                return res.status(409).send({ message: 'Usuário já cadastrado' })
+                const response = {
+                    status: false,
+                    message: "Usuário já cadastrado",
+                    data: null
+                }
+                return res.status(409).send(response)
             }
-            const senhaHash = await bcrypt.hashSync(senha, 10);  
+            const senhaHash = await bcrypt.hashSync(senha, 10);
             const resultadoCreate = await Usuario.create({
                 email,
                 senha: senhaHash,
-            })       
+            })
             const response = {
-                message: "Usuário criado com sucesso!",
-                createdUserId: resultadoCreate.id_usuario
-            }               
+                status: true,
+                message: "Produto criado com sucesso!",
+                data: {
+                    createdUserId: resultadoCreate.id_usuario
+                }
+            }
             return res.status(201).send(response);
         } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao criar usuário",
+                data: error
+            }
             console.log(error);
-            return res.status(500).send({ error: error });
+            return res.status(500).send(response);
         }
-    }           
+    }
     async login(req, res) {
         try {
             const { email } = req.body
-            const { senha } = req.body          
+            const { senha } = req.body
             let results = await Usuario.findAll({
                 where: {
                     email
                 }
             })
             if (results.length < 1) {
-                return res.status(401).send({ message: 'Falha na autenticação' })
+                const response = {
+                    status: false,
+                    message: "Falha na autenticação",
+                    data: null
+                }
+                return res.status(401).send(response)
             }
             if (await bcrypt.compareSync(senha, results[0].senha)) {
                 const token = jwt.sign({
                     userId: results[0].userId,
                     email: results[0].email
                 },
-                process.env.JWT_KEY,
-                {
-                    expiresIn: "1h"
-                });
-                return res.status(200).send({
-                    message: 'Autenticado com sucesso',
-                    token: token
-                });                
+                    process.env.JWT_KEY,
+                    {
+                        expiresIn: "1h"
+                    });
+                const response = {
+                    status: true,
+                    message: "Autenticado com sucesso",
+                    data: { token }
+                }
+                return res.status(200).send(response)
             }
-            return res.status(401).send({ message: 'Falha na autenticação' })
+            const response = {
+                status: false,
+                message: "Falha na autenticação",
+                data: null
+            }
+            return res.status(401).send(response)
         } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao autenticar usuário",
+                data: error
+            }
             console.log(error);
-            return res.status(500).send({ message: 'Falha na autenticação' });
+            return res.status(500).send(response);
         }
-    }           
+    }
     async forgotPassword(req, res) {
         try {
-            const { email } = req.body    
+            const { email } = req.body
             let user = await Usuario.findOne({ email })
-            if(!user)
-                return res.status(400).send({ error: 'Usuário não encontrado.'} )
-            const token = crypto.randomBytes(20).toString('hex')    
+            if (!user) {
+                const response = {
+                    status: false,
+                    message: "Usuário não encontrado",
+                    data: null
+                }
+                return res.status(400).send(response);
+            }
+            const token = crypto.randomBytes(20).toString('hex')
             const now = new Date()
-            now.setHours(now.getHours() + 1)  
-            user.password_reset_token = token 
-            user.password_reset_expires = now  
-            user.save()  
+            now.setHours(now.getHours() + 1)
+            user.password_reset_token = token
+            user.password_reset_expires = now
+            user.save()
             mailer.sendMail({
                 from: 'fernando.silva@regulacaoriorj.com.br',
                 to: email,
                 subject: 'Link para Resetar sua Senha ✔',
-                text: `Utilize o token ${ token } para resetar sua senha`,
-              }, (err) => {
-                  console.log(err);
-                if(err)
-                  return res.status(400).send({ error: 'Cannot send forgot password email' })
-        
-                return res.status(200).send({ message: "Email send successfully" })
-              })            
+                text: `Utilize o token ${token} para resetar sua senha`,
+            }, (err) => {
+                console.log(err);
+                if (err) {
+                    const response = {
+                        status: false,
+                        message: "Não foi possivel enviar o email de recuperação de senha",
+                        data: null
+                    }
+                    return res.status(401).send(response)
+                }
+                const response = {
+                    status: true,
+                    message: "Email enviado com sucesso!",
+                    data: null
+                }
+                return res.status(200).send(response)
+            })
         } catch (error) {
-            console.log(error)
-            return res.status(400).send({ error: 'Error on forgot password, try again' })
+            const response = {
+                status: false,
+                message: "Erro ao enviar email de recuperação",
+                data: error
+            }
+            console.log(error);
+            return res.status(500).send(response);
         }
-    } 
+    }
     async resetPassword(req, res) {
-        const { email, token, password } =  req.body
+        const { email, token, password } = req.body
         try {
-          const usuario = await Usuario.findOne({ email })
-          if (!usuario) return res.status(400).send({ error: "Usuario não encontrado." });
+            const usuario = await Usuario.findOne({ email })
+            if (!usuario) {
+                const response = {
+                    status: false,
+                    message: "Usuario não encontrado",
+                    data: null
+                }
+                return res.status(400).send(response);
+            }
 
-          if (token !== usuario.password_reset_token)
-            return res.status(400).send({ error: "Token invalido." });
+            if (token !== usuario.password_reset_token) {
+                const response = {
+                    status: false,
+                    message: "Token inválido",
+                    data: null
+                }
+                return res.status(400).send(response);
+            }
 
-          const now = new Date();
+            const now = new Date();
 
-          if (now > usuario.password_reset_expires)
-            return res
-              .status(400)
-              .send({ error: "Token expirado, por favor, gere um novo token." });
+            if (now > usuario.password_reset_expires) {
+                const response = {
+                    status: false,
+                    message: "Token expirado, por favor, gere um novo token",
+                    data: null
+                }
+                return res.status(400).send(response);
+            }
 
-          usuario.password = password;
+            usuario.password = password;
 
-          await usuario.save();
-
-          res.status(200).send({ message: "Senha atualizada com sucesso" });
+            await usuario.save();
+            const response = {
+                status: true,
+                message: "Senha atualizada com sucesso",
+                data: null
+            }
+            return res.status(200).send(response);
         } catch (err) {
-            console.log(err);
-          res.status(400).send({ error: "Não foi possível atualizar sua senha." });
-        }        
-    }          
+            const response = {
+                status: false,
+                message: "Erro ao alterar senha",
+                data: error
+            }
+            console.log(error);
+            return res.status(500).send(response);
+        }
+    }
     async readOne(req, res) {
-        const usuario = await Usuario.findByPk(req.params.id);
-        return res.json(usuario);
-    }           
+        try {
+            const usuario = await Usuario.findByPk(req.params.id);
+            const response = {
+                status: true,
+                message: "Usuario obtido com sucesso",
+                data: usuario
+            }
+            return res.status(200).send(response);            
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao buscar usuário",
+                data: error
+            }
+            console.log(error);
+            return res.status(500).send(response);
+        }
+    }
     async readAll(req, res) {
-        const resultado = await database.sync();
-        const usuarios = await Usuario.findAll();     
-        return res.json(usuarios);
-    }           
+        try {
+            const resultado = await database.sync();
+            const usuarios = await Usuario.findAll();
+            const response = {
+                status: true,
+                message: "Lista de usuarios obtida com sucesso",
+                data: usuarios
+            }
+            return res.status(200).send(response);               
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao buscar lista de usuários",
+                data: error
+            }
+            console.log(error);
+            return res.status(500).send(response);
+        }
+
+    }
     async update(req, res) {
-        const usuario = await Usuario.findByPk(req.params.id);        
-        usuario.senha = req.body.senha;
-        const resultadoSave = await usuario.save();
-        return res.json('Senha modificada com sucesso')
-    }   
+        try {
+            const usuario = await Usuario.findByPk(req.params.id);
+            usuario.senha = req.body.senha;
+            const resultadoSave = await usuario.save();
+            const response = {
+                status: true,
+                message: "Senha alterada com sucesso",
+                data: resultadoSave
+            }
+            return res.status(200).send(response);               
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao atualizar informações do usuário",
+                data: error
+            }
+            console.log(error);
+            return res.status(500).send(response);
+        }
+    }
     async delete(req, res) {
-        const usuario = await Usuario.findByPk(req.params.id);
-        const resultadoDelete = await usuario.destroy();   
-        return res.json('Usuario deletado com sucesso')
-    }   
+        try {
+            const usuario = await Usuario.findByPk(req.params.id);
+            const resultadoDelete = await usuario.destroy();
+            const response = {
+                status: true,
+                message: "usuario deletado com sucesso",
+                data: resultadoDelete
+            }
+            return res.status(200).send(response);               
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao deletar usuário",
+                data: error
+            }
+            console.log(error);
+            return res.status(500).send(response);
+        }
+    }
 
 }
 
