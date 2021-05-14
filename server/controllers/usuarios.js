@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto')
 const mailer = require('../modules/mailer')
 const jwt = require('jsonwebtoken');
+const verifyJWT = require('../middlewares/verifyJWT')
 
 class usuariosController {
     async create(req, res) {
@@ -45,6 +46,9 @@ class usuariosController {
             console.log(error);
             return res.status(500).send(response);
         }
+    }
+    async verificaToken(req, res) {
+        return verifyJWT(req, res)
     }
     async login(req, res) {
         try {

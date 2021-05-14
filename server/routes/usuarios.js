@@ -4,6 +4,7 @@ const router = express.Router();
 
 const usuariosController = require('../controllers/usuarios');
 
+router.get('/verificaToken', usuariosController.verificaToken);
 router.post('/login', usuariosController.login);
 router.post('/forgotpassword', usuariosController.forgotPassword);
 router.post('/resetpassword', usuariosController.resetPassword);
