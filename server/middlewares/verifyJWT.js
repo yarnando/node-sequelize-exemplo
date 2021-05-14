@@ -11,7 +11,7 @@ function verifyJWT(req, res, next = null){
     if (!token) return res.status(401).json({...response, message: "Nenhum token recebido."});
     
     jwt.verify(token, process.env.JWT_KEY, function(err, decoded) {
-      if (err) return res.status(500).json({...response, message: "Falha ao verificar token."});
+      if (err) return res.status(401).json({...response, message: "Falha ao verificar token."});
       if(!!next) next() //se for middleware
       return res.status(200).json({...response, status: true, message: "Token válido."}); // se for route
     });

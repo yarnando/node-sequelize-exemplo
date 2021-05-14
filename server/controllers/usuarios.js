@@ -74,7 +74,7 @@ class usuariosController {
                 },
                     process.env.JWT_KEY,
                     {
-                        expiresIn: "1h"
+                        expiresIn: "2m"
                     });
                 const response = {
                     status: true,
