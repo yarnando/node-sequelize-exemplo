@@ -15,13 +15,16 @@ class produtosController {
                 nome,
                 preco,
                 descricao
-            })       
+            })     
+            let produtos = await Produto.findAll({
+                where: {
+                    vendido: false
+                }
+            })              
             const response = {
                 status: true,
                 message: "Produto criado com sucesso!",
-                data: {
-                    createdProdutoId: resultadoCreate.id
-                }                
+                data: produtos               
             }               
             return res.status(201).send(response);
         } catch (error) {
