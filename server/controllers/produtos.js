@@ -63,13 +63,41 @@ class produtosController {
             return res.status(500).send(response); 
         }
     }           
-    async readAll(req, res) {
+    async getProductsInStock(req, res) {
         try {
             const resultado = await database.sync();
-            const produtos = await Produto.findAll();   
+            let produtos = await Produto.findAll({
+                where: {
+                    vendido: false
+                }
+            })
             const response = {
                 status: true,
-                message: "Lista de produtos obtida com sucesso!",
+                message: "Lista de produtos em estoque obtida com sucesso!",
+                data: produtos              
+            }              
+            return res.json(response);                          
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao listar todos os produtos",
+                data: error
+            }              
+            console.log(error);
+            return res.status(500).send(response);             
+        }
+    }           
+    async getProductsSoldOut(req, res) {
+        try {
+            const resultado = await database.sync();
+            let produtos = await Produto.findAll({
+                where: {
+                    vendido: true
+                }
+            })
+            const response = {
+                status: true,
+                message: "Lista de produtos vendidos obtida com sucesso!",
                 data: produtos              
             }              
             return res.json(response);                          
