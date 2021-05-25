@@ -142,14 +142,19 @@ class produtosController {
     }   
     async sell(req, res) {
         try {
-            let id = req.params.id 
+            let id = req.body.id 
             const produto = await Produto.findByPk(id); 
             produto.vendido = true;       
-            const resultadoSave = await produto.save();       
+            const resultadoSave = await produto.save();  
+            let produtosAtualizados = await Produto.findAll({
+                where: {
+                    vendido: false
+                }
+            })                 
             const response = {
                 status: true,
                 message: "Produto vendido com sucesso!",
-                data: resultadoSave              
+                data: produtosAtualizados              
             }              
             return res.json(response);  
         } catch (error) {
