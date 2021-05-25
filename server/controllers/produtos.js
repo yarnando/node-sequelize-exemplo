@@ -37,12 +37,22 @@ class produtosController {
     async readOne(req, res) {
         try {
             const produto = await Produto.findByPk(req.params.id);
-            const response = {
-                status: true,
-                message: "Produto obtido com sucesso!",
-                data: produto              
-            }              
-            return res.json(response);            
+            if(!!produto) {
+                const response = {
+                    status: true,
+                    message: "Produto obtido com sucesso!",
+                    data: produto              
+                }        
+                return res.json(response);           
+            } else {
+                const response = {
+                    status: false,
+                    message: "Produto não encontrado!",
+                    data: null              
+                }                  
+                return res.status(404).send(response); 
+            }            
+                      
         } catch (error) {
             const response = {
                 status: false,
@@ -96,6 +106,28 @@ class produtosController {
             const response = {
                 status: false,
                 message: "Erro ao alterar produto",
+                data: error
+            }              
+            console.log(error);
+            return res.status(500).send(response);    
+        }
+    }   
+    async sell(req, res) {
+        try {
+            let id = req.params.id 
+            const produto = await Produto.findByPk(id); 
+            produto.vendido = true;       
+            const resultadoSave = await produto.save();       
+            const response = {
+                status: true,
+                message: "Produto vendido com sucesso!",
+                data: resultadoSave              
+            }              
+            return res.json(response);  
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao vender produto",
                 data: error
             }              
             console.log(error);

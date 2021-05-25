@@ -15,6 +15,10 @@ const Produto = database.define('produto', {
     preco: {
         type: Sequelize.DOUBLE
     },
+    vendido: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+    },
     descricao: Sequelize.STRING
 })
  
