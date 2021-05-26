@@ -25,9 +25,13 @@ class usuariosController {
                 return res.status(409).send(response)
             }
             const senhaHash = await bcrypt.hashSync(senha, 10);
+            const hoje = new Date();
+            //periodo de 30 dias de trial
+            let hojeMaisTrintaDias = new Date(hoje.setDate(hoje.getDate() + 30))   
             const resultadoCreate = await Usuario.create({
                 email,
                 senha: senhaHash,
+                data_expiracao_trial: hojeMaisTrintaDias
             })
             const response = {
                 status: true,

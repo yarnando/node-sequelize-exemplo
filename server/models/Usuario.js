@@ -21,6 +21,12 @@ const Usuario = database.define('usuario', {
     password_reset_expires: {
         type: Sequelize.DATE
     },
+    data_expiracao_trial: {
+        type: Sequelize.DATE
+    },
+    id_assinatura: {
+        type: Sequelize.INTEGER
+    },
 })
  
 module.exports = Usuario;
