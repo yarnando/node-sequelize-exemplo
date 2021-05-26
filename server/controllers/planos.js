@@ -129,6 +129,30 @@ class PlanosController {
             return res.status(500).send(response); 
         }
     }        
+    async getSubscription(req, res) {
+        try {
+            const id = req.params.id
+            let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+            let subscription = await clientPagarme.subscriptions.find({
+                id
+            })  
+            console.log(subscription);
+            const response = {
+                status: true,
+                message: "Assinatura encontrada!",
+                data: subscription
+            }                        
+            return res.status(200).send(response);
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao buscar assinatura",
+                data: error
+            }              
+            console.log(error);
+            return res.status(500).send(response); 
+        }
+    }        
     async updateSubscription(req, res) {
         try {
             const {
