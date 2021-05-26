@@ -12,6 +12,7 @@ router.post('/criarCartao', verifyJWT, planosController.createCard);
 router.post('/assinarPlano', verifyJWT, planosController.subscribe);
 router.post('/listarAssinaturas', verifyJWT, planosController.listSubscriptions);
 router.get('/buscarAssinatura/:id', verifyJWT, planosController.getSubscription);
+router.post('/validaAssinatura', verifyJWT, planosController.validateSubscription);
 router.post('/atualizarAssinatura', verifyJWT, planosController.updateSubscription);
 router.post('/listarTransacoesDaAssinatura', verifyJWT, planosController.listSubscriptionTransactions);
 router.post('/cancelarAssinatura',verifyJWT, planosController.cancelSubscription);

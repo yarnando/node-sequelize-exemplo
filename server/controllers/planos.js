@@ -1,4 +1,6 @@
+const Usuario = require('../models/Usuario')
 const pagarme = require('pagarme')
+const moment = require('moment')
 
 let pagarmeKey = process.env.pagarmeKey
 
@@ -143,6 +145,60 @@ class PlanosController {
                 data: subscription
             }                        
             return res.status(200).send(response);
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao buscar assinatura",
+                data: error
+            }              
+            console.log(error);
+            return res.status(500).send(response); 
+        }
+    }        
+    async validateSubscription(req, res) {
+        try {
+            const emailUsuario = req.body.email
+            const usuario = await Usuario.findOne({
+                email: emailUsuario
+            });
+            let usuarioEmTrial = moment().isBefore(moment(usuario.data_expiracao_trial)); // true = ainda está em periodo de trial
+            console.log(moment()._d);
+            console.log(moment(usuario.data_expiracao_trial)._d);
+            if(usuarioEmTrial) { //usuario em periodo de testes
+                const response = {
+                    status: true,
+                    message: "Assinatura encontrada(período de testes)!",
+                    data: null
+                }                        
+                return res.status(200).send(response);                
+            }
+            if(!!usuario.id_assinatura) { //usuario não está mais em periodo de testes, verificando se existe alguma assinatura...
+                let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+                let subscription = await clientPagarme.subscriptions.find({
+                    id: usuario.id_assinatura
+                })  
+                if(subscription.current_transaction.status == 'paid') { //assinatura existe. verificando se está paga...
+                    const response = {
+                        status: true,
+                        message: "Assinatura OK!",
+                        data: subscription
+                    }                        
+                    return res.status(200).send(response);  
+                } 
+                const response = { //assinatura existe mas não está paga.
+                    status: false,
+                    message: "Assinatura inválida",
+                    data: subscription
+                }                        
+                return res.status(401).send(response);                         
+            } else { //periodo de testes expirou e ainda não foi feita nenhuma assinatura
+                const response = {
+                    status: false,
+                    message: "Período de testes expirado!",
+                    data: null
+                }                        
+                return res.status(401).send(response);                  
+            }
         } catch (error) {
             const response = {
                 status: false,
