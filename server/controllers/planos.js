@@ -219,7 +219,7 @@ class PlanosController {
                         data: {
                             status: 0, //período de testes,
                             subscription: {
-                                expira_em: usuario.data_expiracao_trial, 
+                                expira_em: data_expiracao_trial.format("DD/MM/YYYY"), 
                                 dias_restantes: data_expiracao_trial.diff(moment(), 'd')
                             }
                         }
