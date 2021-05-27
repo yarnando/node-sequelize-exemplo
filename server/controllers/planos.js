@@ -182,7 +182,7 @@ class PlanosController {
                     message: "Usuário não encontrado",
                     data: null
                 }              
-                return res.status(500).send(response);                 
+                return res.status(404).send(response);                 
             }              
             if(!!usuario.id_assinatura) { //verificando se existe alguma assinatura...
                 let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
@@ -193,23 +193,32 @@ class PlanosController {
                     const response = {
                         status: true,
                         message: "Assinatura OK!",
-                        data: subscription
+                        data: {
+                            status: 2, //assinatura existente e está paga,
+                            subscription
+                        }
                     }                        
                     return res.status(200).send(response);  
                 } 
                 const response = { //assinatura existe mas não está paga.
                     status: false,
                     message: "Assinatura inválida",
-                    data: subscription
+                    data: {
+                        status: 3, //assinatura existente mas não está paga,
+                        subscription
+                    }
                 }                        
-                return res.status(401).send(response);                         
+                return res.status(200).send(response);                         
             } else { //nenhuma assinatura feita ainda
                 let usuarioEmTrial = moment().isBefore(moment(usuario.data_expiracao_trial)); // true = ainda está em periodo de trial                
                 if(usuarioEmTrial) { //nenhuma assinatura feita ainda, mas usuario em periodo de testes
                     const response = {
                         status: true,
                         message: "Assinatura encontrada(período de testes)!",
-                        data: null
+                        data: {
+                            status: 0, //período de testes,
+                            subscription: null
+                        }
                     }                        
                     return res.status(200).send(response);                
                 }    
@@ -217,9 +226,12 @@ class PlanosController {
                 const response = {
                     status: false,
                     message: "Período de testes expirado!",
-                    data: null
+                    data: {
+                        status: 1, // periodo de testes expirou e nenhuma assinatura foi feita ainda 
+                        subscription: null
+                    }
                 }                        
-                return res.status(401).send(response);                  
+                return res.status(200).send(response);                  
             }
         } catch (error) {
             const response = {
