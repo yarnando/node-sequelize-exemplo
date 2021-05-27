@@ -210,14 +210,18 @@ class PlanosController {
                 }                        
                 return res.status(200).send(response);                         
             } else { //nenhuma assinatura feita ainda
-                let usuarioEmTrial = moment().isBefore(moment(usuario.data_expiracao_trial)); // true = ainda está em periodo de trial                
+                let data_expiracao_trial = moment(usuario.data_expiracao_trial)
+                let usuarioEmTrial = moment().isBefore(data_expiracao_trial); // true = ainda está em periodo de trial                
                 if(usuarioEmTrial) { //nenhuma assinatura feita ainda, mas usuario em periodo de testes
                     const response = {
                         status: true,
                         message: "Assinatura encontrada(período de testes)!",
                         data: {
                             status: 0, //período de testes,
-                            subscription: null
+                            subscription: {
+                                expira_em: usuario.data_expiracao_trial, 
+                                dias_restantes: data_expiracao_trial.diff(moment(), 'd')
+                            }
                         }
                     }                        
                     return res.status(200).send(response);                
