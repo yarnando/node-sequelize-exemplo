@@ -8,6 +8,9 @@ const Usuario = database.define('usuario', {
         allowNull: false,
         primaryKey: true
     },
+    id_usuario_pagarme: {
+        type: Sequelize.INTEGER
+    },    
     email: {
         type: Sequelize.STRING,
         allowNull: false

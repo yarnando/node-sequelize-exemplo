@@ -59,12 +59,114 @@ class PlanosController {
             return res.status(500).send(response);            
         }
     }  
+    async createCustomer(req, res) {     
+        try {
+            const id_usuario = req.params.id
+            const { 
+                name,
+                type,
+                country,
+                email,
+                documents,
+                phone_numbers,
+                birthday,
+             } = req.body 
+             const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado no banco de dados da aplicação",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }                        
+            let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+            let createdCustomer = await clientPagarme.customers.create({
+                external_id: id_usuario,
+                name,
+                type,
+                country,
+                email,
+                documents,
+                phone_numbers,
+                birthday,       
+            })  
+            console.log(createdCustomer);   
+            usuario.id_usuario_pagarme = createdCustomer.id;
+            const resultadoSave = await usuario.save();            
+            const response = {
+                status: true,
+                message: "Cliente criado com sucesso!",
+                data: createdCustomer
+            }                       
+            return res.status(201).send(response);
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao criar cliente",
+                data: error
+            }       
+            console.log(error);       
+            return res.status(500).send(response); 
+        }
+    }      
+    async getCustomer(req, res) {     
+        try {
+            const id_usuario_pagarme = req.params.id_usuario_pagarme                     
+            let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+            let customer = await clientPagarme.customers.find({
+                id: id_usuario_pagarme,     
+            })  
+            console.log(customer);   
+            const response = {
+                status: true,
+                message: "Cliente encontrado!",
+                data: customer
+            }                       
+            return res.status(200).send(response);
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao encontrar cliente",
+                data: error
+            }       
+            console.log(error);       
+            return res.status(500).send(response); 
+        }
+    }      
     async createCard(req, res) {
         try {
-            const payload = req.body 
+            const { 
+                customer_id,
+                card_number,
+                card_holder_name,
+                card_expiration_date,
+                card_cvv,
+             } = req.body 
+             const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario: customer_id
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }                        
             let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
             let createdCard = await clientPagarme.cards.create({
-                ...payload              
+                customer_id,
+                card_number,
+                card_holder_name,
+                card_expiration_date,
+                card_cvv,            
             })  
             console.log(createdCard);   
             const response = {
@@ -78,8 +180,8 @@ class PlanosController {
                 status: false,
                 message: "Erro ao criar cartão",
                 data: error
-            }              
-            console.log(error);
+            }       
+            console.log(error);       
             return res.status(500).send(response); 
         }
     }      
