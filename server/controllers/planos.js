@@ -116,7 +116,21 @@ class PlanosController {
     }      
     async getCustomer(req, res) {     
         try {
-            const id_usuario_pagarme = req.params.id_usuario_pagarme                     
+            const id_usuario = req.params.id
+             const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado no banco de dados da aplicação",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }             
+            const id_usuario_pagarme = usuario.id_usuario_pagarme                     
             let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
             let customer = await clientPagarme.customers.find({
                 id: id_usuario_pagarme,     
@@ -138,6 +152,44 @@ class PlanosController {
             return res.status(500).send(response); 
         }
     }      
+    async getCustomerCards(req, res) {
+        try {
+            const id_usuario = req.params.id
+             const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado no banco de dados da aplicação",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }             
+            const id_usuario_pagarme = usuario.id_usuario_pagarme                                 
+            let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+            let customerCards = await clientPagarme.cards.all({
+                customer_id: id_usuario_pagarme,          
+            })  
+            console.log(customerCards);   
+            const response = {
+                status: true,
+                message: "Lista de cartões do cliente obtida com sucesso!",
+                data: customerCards
+            }                       
+            return res.status(201).send(response);
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao buscar lista de cartões do cliente",
+                data: error
+            }       
+            console.log(error);       
+            return res.status(500).send(response); 
+        }
+    }      
     async createCard(req, res) {
         try {
             const { 
@@ -149,13 +201,13 @@ class PlanosController {
              } = req.body 
              const usuario = await Usuario.findOne({
                 where: {
-                    id_usuario: customer_id
+                    id_usuario_pagarme: customer_id
                 }
             });    
             if(!usuario) {
                 const response = {
                     status: false,
-                    message: "Cliente não encontrado",
+                    message: "Cliente não encontrado no banco da aplicação",
                     data: null
                 }              
                 return res.status(500).send(response);                 
