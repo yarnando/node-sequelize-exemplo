@@ -64,7 +64,6 @@ class PlanosController {
             const id_usuario = req.params.id
             const { 
                 name,
-                type,
                 country,
                 email,
                 documents,
@@ -88,7 +87,7 @@ class PlanosController {
             let createdCustomer = await clientPagarme.customers.create({
                 external_id: id_usuario,
                 name,
-                type,
+                type: "individual", //individual ou corporation. 
                 country,
                 email,
                 documents,
