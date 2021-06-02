@@ -88,7 +88,7 @@ class PlanosController {
                 external_id: id_usuario,
                 name,
                 type: "individual", //individual ou corporation. 
-                country,
+                country: "br",
                 email,
                 documents,
                 phone_numbers,
