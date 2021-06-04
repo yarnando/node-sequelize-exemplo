@@ -181,7 +181,12 @@ class PlanosController {
                 }                       
                 return res.status(201).send(response);                
             } else {
-                throw new Error("Customer não encontrado")
+                const response = {
+                    status: true,
+                    message: "Cliente não encontrado no pagarme",
+                    data: []
+                }                       
+                return res.status(500).send(response); 
             }                                   
         } catch (error) {
             const response = {
