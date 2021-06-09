@@ -63,7 +63,7 @@ class usuariosController {
                     email
                 }
             })
-            if (usuario.length < 1) {
+            if (!usuario || usuario.length < 1) {
                 const response = {
                     status: false,
                     message: "Falha na autenticação",

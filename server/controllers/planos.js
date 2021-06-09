@@ -167,23 +167,32 @@ class PlanosController {
                 }              
                 return res.status(500).send(response);                 
             }             
-            const id_usuario_pagarme = usuario.id_usuario_pagarme                                 
-            let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
-            let customerCards = await clientPagarme.cards.all({
-                customer_id: id_usuario_pagarme,          
-            })  
-            console.log(customerCards);   
-            const response = {
-                status: true,
-                message: "Lista de cartões do cliente obtida com sucesso!",
-                data: customerCards
-            }                       
-            return res.status(201).send(response);
+            const id_usuario_pagarme = usuario.id_usuario_pagarme         
+            if(!!id_usuario_pagarme) {
+                let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+                let customerCards = await clientPagarme.cards.find({
+                    customer_id: id_usuario_pagarme
+                }) 
+                // console.log(customerCards);   
+                const response = {
+                    status: true,
+                    message: "Lista de cartões do cliente obtida com sucesso!",
+                    data: customerCards
+                }                       
+                return res.status(201).send(response);                
+            } else {
+                const response = {
+                    status: true,
+                    message: "Cliente não encontrado no pagarme",
+                    data: []
+                }                       
+                return res.status(500).send(response); 
+            }                                   
         } catch (error) {
             const response = {
                 status: false,
                 message: "Erro ao buscar lista de cartões do cliente",
-                data: error
+                data: error.message
             }       
             console.log(error);       
             return res.status(500).send(response); 
