@@ -263,7 +263,9 @@ class PlanosController {
             }        
             let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
             let createdSubscription = await clientPagarme.subscriptions.create({
-                ...data               
+                ...data,               
+                "plan_id": 573355,
+                "payment_method":"credit_card",
             })  
             usuario.id_assinatura = createdSubscription.id;
             const resultadoSave = await usuario.save();            
