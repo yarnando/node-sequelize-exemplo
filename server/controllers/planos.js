@@ -191,29 +191,29 @@ class PlanosController {
     }      
     async createCard(req, res) {
         try {
-            const { 
-                customer_id,
-                card_number,
-                card_holder_name,
-                card_expiration_date,
-                card_cvv,
-             } = req.body 
-             const usuario = await Usuario.findOne({
+            const id_usuario = req.params.id
+            const usuario = await Usuario.findOne({
                 where: {
-                    id_usuario_pagarme: customer_id
+                    id_usuario
                 }
             });    
             if(!usuario) {
                 const response = {
                     status: false,
-                    message: "Cliente não encontrado no banco da aplicação",
+                    message: "Cliente não encontrado no banco de dados da aplicação",
                     data: null
                 }              
                 return res.status(500).send(response);                 
-            }                        
+            }              
+            const { 
+                card_number,
+                card_holder_name,
+                card_expiration_date,
+                card_cvv,
+             } = req.body                        
             let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
             let createdCard = await clientPagarme.cards.create({
-                customer_id,
+                customer_id: usuario.id_usuario_pagarme,
                 card_number,
                 card_holder_name,
                 card_expiration_date,
