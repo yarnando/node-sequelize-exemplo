@@ -85,6 +85,7 @@ class usuariosController {
                     message: "Autenticado com sucesso",
                     data: { 
                         id_usuario: usuario.id_usuario,
+                        id_assinatura: usuario.id_assinatura,
                         token    
                     }
                 }
