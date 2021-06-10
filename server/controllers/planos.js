@@ -198,6 +198,30 @@ class PlanosController {
             return res.status(500).send(response); 
         }
     }      
+    async getCard(req, res) {
+        try {
+            const card_id = req.params.id                 
+            let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+            let customerCards = await clientPagarme.cards.find({
+                id: card_id
+            }) 
+            // console.log(customerCards);   
+            const response = {
+                status: true,
+                message: "Cartão obtido com sucesso!",
+                data: customerCards
+            }                       
+            return res.status(201).send(response);                                              
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao buscar cartão",
+                data: error.message
+            }       
+            console.log(error);       
+            return res.status(500).send(response); 
+        }
+    }      
     async createCard(req, res) {
         try {
             const id_usuario = req.params.id
