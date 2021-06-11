@@ -383,7 +383,7 @@ class PlanosController {
                         message: "Assinatura OK!",
                         data: {
                             status: 2, //assinatura existente e está paga,
-                            subscription
+                            data: subscription
                         }
                     }                        
                     return res.status(200).send(response);  
@@ -393,10 +393,10 @@ class PlanosController {
                     message: "Assinatura inválida",
                     data: {
                         status: 3, //assinatura existente mas não está paga,
-                        subscription
+                        data: subscription
                     }
                 }                        
-                return res.status(200).send(response);                         
+                return res.status(500).send(response);                         
             } else { //nenhuma assinatura feita ainda
                 let data_expiracao_trial = moment(usuario.data_expiracao_trial)
                 let usuarioEmTrial = moment().isBefore(data_expiracao_trial); // true = ainda está em periodo de trial                
@@ -406,7 +406,7 @@ class PlanosController {
                         message: "Assinatura encontrada(período de testes)!",
                         data: {
                             status: 0, //período de testes,
-                            subscription: {
+                            data: {
                                 expira_em: data_expiracao_trial.format("DD/MM/YYYY"), 
                                 dias_restantes: data_expiracao_trial.diff(moment(), 'd')
                             }
@@ -420,10 +420,10 @@ class PlanosController {
                     message: "Período de testes expirado!",
                     data: {
                         status: 1, // periodo de testes expirou e nenhuma assinatura foi feita ainda 
-                        subscription: null
+                        data: null
                     }
                 }                        
-                return res.status(200).send(response);                  
+                return res.status(500).send(response);                  
             }
         } catch (error) {
             const response = {
