@@ -8,6 +8,7 @@ const verifyJWT = require('../middlewares/verifyJWT')
 
 class usuariosController {
     async create(req, res) {
+        await database.sync();
         try {
             const { email } = req.body
             const { senha } = req.body

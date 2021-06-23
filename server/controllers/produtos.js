@@ -97,6 +97,7 @@ class produtosController {
         }
     }           
     async getProductsInStock(req, res) {
+        await database.sync();
         try {
             let id_usuario = res.locals.decoded.id_usuario
             const usuario = await Usuario.findOne({
@@ -136,6 +137,7 @@ class produtosController {
         }
     }           
     async getProductsSoldOut(req, res) {
+        await database.sync();
         try {
             let id_usuario = res.locals.decoded.id_usuario
             const usuario = await Usuario.findOne({
