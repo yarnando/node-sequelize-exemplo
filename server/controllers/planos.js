@@ -59,12 +59,198 @@ class PlanosController {
             return res.status(500).send(response);            
         }
     }  
+    async createCustomer(req, res) {     
+        try {
+            const id_usuario = req.params.id
+            const { 
+                name,
+                country,
+                email,
+                documents,
+                phone_numbers,
+                birthday,
+             } = req.body 
+             const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado no banco de dados da aplicação",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }                        
+            let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+            let createdCustomer = await clientPagarme.customers.create({
+                external_id: id_usuario,
+                name,
+                type: "individual", //individual ou corporation. 
+                country: "br",
+                email,
+                documents,
+                phone_numbers,
+                birthday,       
+            })  
+            console.log(createdCustomer);   
+            usuario.id_usuario_pagarme = createdCustomer.id;
+            const resultadoSave = await usuario.save();            
+            const response = {
+                status: true,
+                message: "Cliente criado com sucesso!",
+                data: createdCustomer
+            }                       
+            return res.status(201).send(response);
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao criar cliente",
+                data: error
+            }       
+            console.log(error);       
+            return res.status(500).send(response); 
+        }
+    }      
+    async getCustomer(req, res) {     
+        try {
+            const id_usuario = req.params.id
+             const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado no banco de dados da aplicação",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }             
+            const id_usuario_pagarme = usuario.id_usuario_pagarme                     
+            let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+            let customer = await clientPagarme.customers.find({
+                id: id_usuario_pagarme,     
+            })  
+            console.log(customer);   
+            const response = {
+                status: true,
+                message: "Cliente encontrado!",
+                data: customer
+            }                       
+            return res.status(200).send(response);
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao encontrar cliente",
+                data: error
+            }       
+            console.log(error);       
+            return res.status(500).send(response); 
+        }
+    }      
+    async getCustomerCards(req, res) {
+        try {
+            const id_usuario = req.params.id
+             const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado no banco de dados da aplicação",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }             
+            const id_usuario_pagarme = usuario.id_usuario_pagarme         
+            if(!!id_usuario_pagarme) {
+                let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+                let customerCards = await clientPagarme.cards.find({
+                    customer_id: id_usuario_pagarme
+                }) 
+                // console.log(customerCards);   
+                const response = {
+                    status: true,
+                    message: "Lista de cartões do cliente obtida com sucesso!",
+                    data: customerCards
+                }                       
+                return res.status(201).send(response);                
+            } else {
+                const response = {
+                    status: true,
+                    message: "Cliente não encontrado no pagarme",
+                    data: []
+                }                       
+                return res.status(500).send(response); 
+            }                                   
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao buscar lista de cartões do cliente",
+                data: error.message
+            }       
+            console.log(error);       
+            return res.status(500).send(response); 
+        }
+    }      
+    async getCard(req, res) {
+        try {
+            const card_id = req.params.id                 
+            let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
+            let customerCards = await clientPagarme.cards.find({
+                id: card_id
+            }) 
+            // console.log(customerCards);   
+            const response = {
+                status: true,
+                message: "Cartão obtido com sucesso!",
+                data: customerCards
+            }                       
+            return res.status(201).send(response);                                              
+        } catch (error) {
+            const response = {
+                status: false,
+                message: "Erro ao buscar cartão",
+                data: error.message
+            }       
+            console.log(error);       
+            return res.status(500).send(response); 
+        }
+    }      
     async createCard(req, res) {
         try {
-            const payload = req.body 
+            const id_usuario = req.params.id
+            const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado no banco de dados da aplicação",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }              
+            const { 
+                card_number,
+                card_holder_name,
+                card_expiration_date,
+                card_cvv,
+             } = req.body                        
             let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
             let createdCard = await clientPagarme.cards.create({
-                ...payload              
+                customer_id: usuario.id_usuario_pagarme,
+                card_number,
+                card_holder_name,
+                card_expiration_date,
+                card_cvv,            
             })  
             console.log(createdCard);   
             const response = {
@@ -78,8 +264,8 @@ class PlanosController {
                 status: false,
                 message: "Erro ao criar cartão",
                 data: error
-            }              
-            console.log(error);
+            }       
+            console.log(error);       
             return res.status(500).send(response); 
         }
     }      
@@ -101,7 +287,9 @@ class PlanosController {
             }        
             let clientPagarme = await pagarme.client.connect({ api_key: pagarmeKey })       
             let createdSubscription = await clientPagarme.subscriptions.create({
-                ...data               
+                ...data,               
+                "plan_id": 573355,
+                "payment_method":"credit_card",
             })  
             usuario.id_assinatura = createdSubscription.id;
             const resultadoSave = await usuario.save();            
@@ -195,7 +383,7 @@ class PlanosController {
                         message: "Assinatura OK!",
                         data: {
                             status: 2, //assinatura existente e está paga,
-                            subscription
+                            data: subscription
                         }
                     }                        
                     return res.status(200).send(response);  
@@ -205,10 +393,10 @@ class PlanosController {
                     message: "Assinatura inválida",
                     data: {
                         status: 3, //assinatura existente mas não está paga,
-                        subscription
+                        data: subscription
                     }
                 }                        
-                return res.status(200).send(response);                         
+                return res.status(500).send(response);                         
             } else { //nenhuma assinatura feita ainda
                 let data_expiracao_trial = moment(usuario.data_expiracao_trial)
                 let usuarioEmTrial = moment().isBefore(data_expiracao_trial); // true = ainda está em periodo de trial                
@@ -218,8 +406,8 @@ class PlanosController {
                         message: "Assinatura encontrada(período de testes)!",
                         data: {
                             status: 0, //período de testes,
-                            subscription: {
-                                expira_em: usuario.data_expiracao_trial, 
+                            data: {
+                                expira_em: data_expiracao_trial.format("DD/MM/YYYY"), 
                                 dias_restantes: data_expiracao_trial.diff(moment(), 'd')
                             }
                         }
@@ -232,10 +420,10 @@ class PlanosController {
                     message: "Período de testes expirado!",
                     data: {
                         status: 1, // periodo de testes expirou e nenhuma assinatura foi feita ainda 
-                        subscription: null
+                        data: null
                     }
                 }                        
-                return res.status(200).send(response);                  
+                return res.status(500).send(response);                  
             }
         } catch (error) {
             const response = {

@@ -13,10 +13,15 @@ function verifyJWT(req, res, next = null){
     jwt.verify(token, process.env.JWT_KEY, function(err, decoded) {
       if (err) return res.status(401).json({...response, message: "Falha ao verificar token."});
       if(!!next) { //se for middleware
+        res.locals.decoded = decoded
         next();
-        return
+        return 
       } 
-      return res.status(200).json({...response, status: true, message: "Token válido."}); // se for route
+      return res.status(200).json({
+        status: true, 
+        message: "Token válido.",
+        data: decoded
+      }); // se for route
     });
   }
 

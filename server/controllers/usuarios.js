@@ -8,6 +8,7 @@ const verifyJWT = require('../middlewares/verifyJWT')
 
 class usuariosController {
     async create(req, res) {
+        await database.sync();
         try {
             const { email } = req.body
             const { senha } = req.body
@@ -58,12 +59,12 @@ class usuariosController {
         try {
             const { email } = req.body
             const { senha } = req.body
-            let results = await Usuario.findAll({
+            let usuario = await Usuario.findOne({
                 where: {
                     email
                 }
             })
-            if (results.length < 1) {
+            if (!usuario || usuario.length < 1) {
                 const response = {
                     status: false,
                     message: "Falha na autenticação",
@@ -71,10 +72,10 @@ class usuariosController {
                 }
                 return res.status(401).send(response)
             }
-            if (await bcrypt.compareSync(senha, results[0].senha)) {
+            if (await bcrypt.compareSync(senha, usuario.senha)) {
                 const token = jwt.sign({
-                    userId: results[0].userId,
-                    email: results[0].email
+                    id_usuario: usuario.dataValues.id_usuario,
+                    email: usuario.dataValues.email
                 },
                     process.env.JWT_KEY,
                     {
@@ -83,7 +84,11 @@ class usuariosController {
                 const response = {
                     status: true,
                     message: "Autenticado com sucesso",
-                    data: { token }
+                    data: { 
+                        id_usuario: usuario.id_usuario,
+                        id_assinatura: usuario.id_assinatura,
+                        token    
+                    }
                 }
                 return res.status(200).send(response)
             }
