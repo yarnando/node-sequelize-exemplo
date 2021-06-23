@@ -33,6 +33,7 @@ class produtosController {
             })     
             let produtos = await Produto.findAll({
                 where: {
+                    id_usuario,
                     vendido: false
                 }
             })              
@@ -238,6 +239,7 @@ class produtosController {
             const resultadoSave = await produto.save();  
             let produtosAtualizados = await Produto.findAll({
                 where: {
+                    id_usuario,
                     vendido: false
                 }
             })                 
