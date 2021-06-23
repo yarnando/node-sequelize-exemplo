@@ -114,6 +114,7 @@ class produtosController {
             const resultado = await database.sync();
             let produtos = await Produto.findAll({
                 where: {
+                    id_usuario,
                     vendido: false
                 }
             })
