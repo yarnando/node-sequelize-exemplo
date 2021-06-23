@@ -73,8 +73,8 @@ class usuariosController {
             }
             if (await bcrypt.compareSync(senha, usuario.senha)) {
                 const token = jwt.sign({
-                    userId: usuario.userId,
-                    email: usuario.email
+                    id_usuario: usuario.dataValues.id_usuario,
+                    email: usuario.dataValues.email
                 },
                     process.env.JWT_KEY,
                     {

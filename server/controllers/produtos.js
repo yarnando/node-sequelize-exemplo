@@ -1,17 +1,32 @@
 const database = require('../db')
 const Produto = require('../models/Produto')
-const jwt = require('jsonwebtoken');
+const Usuario = require('../models/Usuario')
 
 class produtosController {    
     async create(req, res) {
         await database.sync();
         try {
+            let id_usuario = res.locals.decoded.id_usuario
+            const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado no banco de dados da aplicação",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }                         
             const { 
                 nome,
                 preco,
                 descricao
              } = req.body        
             const resultadoCreate = await Produto.create({
+                id_usuario,
                 nome,
                 preco,
                 descricao
@@ -39,6 +54,20 @@ class produtosController {
     }                   
     async readOne(req, res) {
         try {
+            let id_usuario = res.locals.decoded.id_usuario
+            const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado no banco de dados da aplicação",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }              
             const produto = await Produto.findByPk(req.params.id);
             if(!!produto) {
                 const response = {
@@ -68,6 +97,20 @@ class produtosController {
     }           
     async getProductsInStock(req, res) {
         try {
+            let id_usuario = res.locals.decoded.id_usuario
+            const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado no banco de dados da aplicação",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }                         
             const resultado = await database.sync();
             let produtos = await Produto.findAll({
                 where: {
@@ -92,9 +135,24 @@ class produtosController {
     }           
     async getProductsSoldOut(req, res) {
         try {
+            let id_usuario = res.locals.decoded.id_usuario
+            const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado no banco de dados da aplicação",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }              
             const resultado = await database.sync();
             let produtos = await Produto.findAll({
                 where: {
+                    id_usuario,
                     vendido: true
                 }
             })
@@ -116,6 +174,20 @@ class produtosController {
     }           
     async update(req, res) {
         try {
+            let id_usuario = res.locals.decoded.id_usuario
+            const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado no banco de dados da aplicação",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }              
             let id = req.params.id
             const { 
                 nome,
@@ -145,6 +217,20 @@ class produtosController {
     }   
     async sell(req, res) {
         try {
+            let id_usuario = res.locals.decoded.id_usuario
+            const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado no banco de dados da aplicação",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }              
             let id = req.body.id 
             const produto = await Produto.findByPk(id); 
             produto.vendido = true;       
@@ -172,6 +258,20 @@ class produtosController {
     }   
     async delete(req, res) {
         try {
+            let id_usuario = res.locals.decoded.id_usuario
+            const usuario = await Usuario.findOne({
+                where: {
+                    id_usuario
+                }
+            });    
+            if(!usuario) {
+                const response = {
+                    status: false,
+                    message: "Cliente não encontrado no banco de dados da aplicação",
+                    data: null
+                }              
+                return res.status(500).send(response);                 
+            }              
             let id = req.params.id 
             const produto = await Produto.findByPk(id);     
             const resultadoDelete = await produto.destroy();  

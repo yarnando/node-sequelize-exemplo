@@ -8,6 +8,9 @@ const Produto = database.define('produto', {
         allowNull: false,
         primaryKey: true
     },
+    id_usuario: {
+        type: Sequelize.INTEGER,
+    },
     nome: {
         type: Sequelize.STRING,
         allowNull: false
